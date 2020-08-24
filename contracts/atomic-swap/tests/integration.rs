@@ -17,12 +17,12 @@
 //!      });
 //! 4. Anywhere you see query(&deps, ...) you must replace it with query(&mut deps, ...)
 
-use cosmwasm_std::{coins, BankMsg, Coin, CosmosMsg, Env, StdError};
+use cosmwasm_std::{coins, BankMsg, Coin, CosmosMsg, Env, QueryResponse, StdError, StdResult};
 use cosmwasm_std::{log, HandleResponse, HandleResult, HumanAddr, InitResponse};
-use cosmwasm_vm::testing::{handle, init, mock_env, mock_instance};
+use cosmwasm_vm::testing::{handle, init, mock_env, mock_instance, query};
 use sha2::{Digest, Sha256};
 
-use atomic_swap::msg::{CreateMsg, HandleMsg, InitMsg};
+use atomic_swap::msg::{CreateMsg, HandleMsg, InitMsg, QueryMsg};
 use cosmwasm_std::testing::MOCK_CONTRACT_ADDR;
 
 // This line will test the output of cargo wasm
@@ -339,4 +339,14 @@ fn test_refund() {
         StdError::NotFound { .. } => {}
         e => panic!("Expected NotFound, got {}", e),
     }
+}
+
+#[test]
+fn integ_test_query() {
+    let mut deps = mock_instance(WASM, &[]);
+
+    let env = mock_env("anyone", &[]);
+    let _: InitResponse = init(&mut deps, env, InitMsg {}).unwrap();
+
+    let query_binary: StdResult<QueryResponse> = query(&mut deps, QueryMsg::List {});
 }
